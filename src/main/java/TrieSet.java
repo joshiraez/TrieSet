@@ -1,5 +1,6 @@
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class TrieSet<T extends List<U>, U> {
     private final TrieSetNode<T,U> root;
@@ -52,5 +53,21 @@ class TrieSetNode<T extends List<U>,U> {
         if (!this.nodes.containsKey(firstElement)) return elementToRetrieve.size();
 
         return this.nodes.get(firstElement).checkIfElementExistsPartially(remainingElements);
+    }
+
+    public Map<U, List<U>> retrieveElementsFromNode() {
+        //Null element is used to signify an ending node. This allows for a recursive algorithm
+
+        Map<U, List<U>> elementsFromThisNode = nodes.entrySet().stream()
+                .collect(Collectors.toMap( //Map<U, Map<U, Map<?>>>
+                        Map.Entry::getKey,
+                        nodeEntry -> nodeEntry.getValue().retrieveElementsFromNode().entrySet().stream()
+                                .map( subNodeElementsEntry -> {
+                                    subNodeElementsEntry.getValue().add(0, subNodeElementsEntry.getKey());
+                                    return subNodeElementsEntry.getValue();
+                                })
+                ));
+
+
     }
 }
